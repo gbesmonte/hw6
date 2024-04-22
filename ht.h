@@ -300,37 +300,71 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 {
-
+    for (size_t i = 0; i < table_.size(); i++){
+        if (table_[i] != nullptr){
+            delete table_[i];
+            table_[i] = nullptr;
+        }
+    }
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 bool HashTable<K,V,Prober,Hash,KEqual>::empty() const
 {
-
+    for (size_t i = 0; i < table_.size(); i++){
+        if (table_[i]->deleted != false){
+            return false;
+        }
+    }
+    return true;
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 {
-
+    size_t count = 0;
+    for (size_t i = 0; i < table_.size(); i++){
+        if (table_[i]->deleted == false){
+            count++;
+        }
+    }
+    return count;
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
+    //if already exists, update value
+    if (internalFind(p.first) != nullptr){
+        HashItem* h = internalFind(p.first);
+        h->item = p;
+        h->deleted = false;
+        return;
+    }
+    //else, insert into hash table
+        //check if loading factor is too high?
 
-
+    HASH_INDEX_T i = probe(p.first);
+    if (i == npos){
+        throw std::logic_error("no free loc found");
+    }
+    else{
+        HashItem* h = new HashItem(p);
+        table_[i] = h;
+    }
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 {
-
-
+    HashItem* h = internalFind(key);
+    if (h != nullptr){
+        h->deleted = true;
+    }
 }
 
 
@@ -424,7 +458,7 @@ HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::probe(const KeyType& key) const
         }
         // fill in the condition for this else if statement which should 
         // return 'loc' if the given key exists at this location
-        else if(/* Fill me in */) {
+        else if(table_[loc]->item.first == key) {
             return loc;
         }
         loc = prober_.next();
