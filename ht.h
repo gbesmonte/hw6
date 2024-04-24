@@ -274,6 +274,7 @@ private:
 
     // ADD MORE DATA MEMBERS HERE, AS NECESSARY
     double alpha;
+    size_t used;
 };
 
 // ----------------------------------------------------------------------------
@@ -300,6 +301,7 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
     mIndex_ = 0;
     totalProbes_ = 0;
     table_.resize(CAPACITIES[mIndex_], nullptr);
+    used = 0;
 }
 
 // To be completed
@@ -351,12 +353,11 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
     if (internalFind(p.first) != nullptr){
         HashItem* h = internalFind(p.first);
         h->item = p;
-        h->deleted = false;
         return;
     }
     //else, insert into hash table
     //check if loading factor is too high?
-    double load = size()/(double)table_.size();
+    double load = used/(double)table_.size();
     if (load >= alpha){
         resize();
     }
@@ -368,6 +369,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
     else{
         HashItem* h = new HashItem(p);
         table_[i] = h;
+        used++;
     }
 }
 
@@ -460,6 +462,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
     std::vector<HashItem*> newTable_;
     newTable_.resize(CAPACITIES[mIndex_], nullptr);
     table_ = newTable_;
+    used = 0;
     for (size_t i = 0; i < old_Table.size();i++){
         if (old_Table[i] != nullptr) {
             if (old_Table[i]->deleted == false) {
@@ -489,7 +492,7 @@ HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::probe(const KeyType& key) const
         }
             // fill in the condition for this else if statement which should
             // return 'loc' if the given key exists at this location
-        else if(kequal_(table_[loc]->item.first, key)) {
+        else if(kequal_(table_[loc]->item.first, key) && table_[loc]->deleted == false) {
             return loc;
         }
         loc = prober_.next();
