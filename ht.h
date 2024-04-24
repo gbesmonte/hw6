@@ -468,6 +468,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
             if (old_Table[i]->deleted == false) {
                 HashItem* h = old_Table[i];
                 insert(h->item);
+                delete old_Table[i];
             } else {
                 delete old_Table[i];
                 old_Table[i] == nullptr;
