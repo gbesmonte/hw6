@@ -15,7 +15,7 @@ struct Prober {
     HASH_INDEX_T m_;        // table size
     size_t numProbes_;      // probe attempts for statistic tracking
     static const HASH_INDEX_T npos = (HASH_INDEX_T)-1; // used to indicate probing failed
-    void init(HASH_INDEX_T start, HASH_INDEX_T m, const KeyType& key) 
+    void init(HASH_INDEX_T start, HASH_INDEX_T m, const KeyType& key)
     {
         (void) key;  // avoid unused argument warnings since base class doesn't use key
         start_ = start;
@@ -31,12 +31,12 @@ struct Prober {
 template <typename KeyType>
 struct LinearProber : public Prober<KeyType> {
 
-    HASH_INDEX_T next() 
+    HASH_INDEX_T next()
     {
         // Complete the condition below that indicates failure
         // to find the key or an empty slot
         if(this->numProbes_ == this->m_) {
-            return this->npos; 
+            return this->npos;
         }
         HASH_INDEX_T loc = (this->start_ + this->numProbes_) % this->m_;
         this->numProbes_++;
@@ -46,13 +46,13 @@ struct LinearProber : public Prober<KeyType> {
 
 // To be completed
 template <typename KeyType, typename Hash2>
-struct DoubleHashProber : public Prober<KeyType> 
+struct DoubleHashProber : public Prober<KeyType>
 {
     Hash2 h2_;              /// h2(k)
     HASH_INDEX_T dhstep_;   /// Stepsize to use for double hash probing
 
     /// Moduli to use for double hashing as table increases (resizes)
-    static const HASH_INDEX_T DOUBLE_HASH_MOD_VALUES[]; 
+    static const HASH_INDEX_T DOUBLE_HASH_MOD_VALUES[];
     /// The number of elements in the array above
     static const int DOUBLE_HASH_MOD_SIZE;
 
@@ -82,7 +82,7 @@ public:
      * @param h2  h2(k) - Object with an operator()(const KeyType&) defined for it
      */
     DoubleHashProber(const Hash2& h2 = Hash2()) : h2_(h2) {}
-    
+
     /**
      * @brief Supplies info the hash table must provide
      * 
@@ -91,7 +91,7 @@ public:
      * @param key   Key (in case further hashing is necessary)
      */
     // Complete
-    void init(HASH_INDEX_T start, HASH_INDEX_T m, const KeyType& key) 
+    void init(HASH_INDEX_T start, HASH_INDEX_T m, const KeyType& key)
     {
         Prober<KeyType>::init(start, m, key);
         HASH_INDEX_T modulus = findModulusToUseFromTableSize(m);
@@ -100,7 +100,7 @@ public:
     }
 
     // To be completed
-    HASH_INDEX_T next() 
+    HASH_INDEX_T next()
     {
         if(this->numProbes_ == this->m_) {
             return this->npos;
@@ -114,24 +114,24 @@ public:
 // Initialization of static array (do not alter)
 template <typename KeyType, typename Hash2>
 const HASH_INDEX_T DoubleHashProber<KeyType, Hash2>::DOUBLE_HASH_MOD_VALUES[] =
-{
-    7, 19, 43, 89, 193, 389, 787, 1583, 3191, 6397, 12841, 25703, 51431, 102871,
-    205721, 411503, 823051, 1646221, 3292463, 6584957, 13169963, 26339921, 52679927,
-    105359939, 210719881, 421439749, 842879563, 1685759113
-};
+        {
+                7, 19, 43, 89, 193, 389, 787, 1583, 3191, 6397, 12841, 25703, 51431, 102871,
+                205721, 411503, 823051, 1646221, 3292463, 6584957, 13169963, 26339921, 52679927,
+                105359939, 210719881, 421439749, 842879563, 1685759113
+        };
 
 // Initialization of static array size (do not alter)
 template <typename KeyType, typename Hash2>
-const int DoubleHashProber<KeyType, Hash2>::DOUBLE_HASH_MOD_SIZE = 
-    sizeof(DoubleHashProber<KeyType, Hash2>::DOUBLE_HASH_MOD_VALUES)/sizeof(HASH_INDEX_T);
+const int DoubleHashProber<KeyType, Hash2>::DOUBLE_HASH_MOD_SIZE =
+        sizeof(DoubleHashProber<KeyType, Hash2>::DOUBLE_HASH_MOD_VALUES)/sizeof(HASH_INDEX_T);
 
 // Hash Table Interface
 template<
-    typename K, 
-    typename V, 
-    typename Prober = LinearProber<K>,
-    typename Hash = std::hash<K>, 
-    typename KEqual = std::equal_to<K> >
+        typename K,
+        typename V,
+        typename Prober = LinearProber<K>,
+        typename Hash = std::hash<K>,
+        typename KEqual = std::equal_to<K> >
 class HashTable
 {
 public:
@@ -157,10 +157,10 @@ public:
      * @param kequal Functor that checks equality of two KeyType objects
      */
     HashTable(
-        double resizeAlpha = 0.4, 
-        const Prober& prober = Prober(),
-        const Hasher& hash = Hasher(), 
-        const KEqual& kequal = KEqual());
+            double resizeAlpha = 0.4,
+            const Prober& prober = Prober(),
+            const Hasher& hash = Hasher(),
+            const KEqual& kequal = KEqual());
 
     /**
      * @brief Destroy the Hash Table object and delete all remaining
@@ -263,7 +263,7 @@ private:
 
     // Data members
     std::vector<HashItem*> table_; // actual hash table
-    Hasher hash_;   
+    Hasher hash_;
     KEqual kequal_;
     mutable Prober prober_;  // mutable allows const member functions to modify this member
     // debug/performance counters
@@ -283,17 +283,17 @@ private:
 // Static array of prime table sizes
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 const HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::CAPACITIES[] =
-    {
-        11, 23, 47, 97, 197, 397, 797, 1597, 3203, 6421, 12853, 25717, 51437, 102877,
-        205759, 411527, 823117, 1646237, 3292489, 6584983, 13169977, 26339969, 52679969,
-        105359969, 210719881, 421439783, 842879579, 1685759167
-    };
+        {
+                11, 23, 47, 97, 197, 397, 797, 1597, 3203, 6421, 12853, 25717, 51437, 102877,
+                205759, 411527, 823117, 1646237, 3292489, 6584983, 13169977, 26339969, 52679969,
+                105359969, 210719881, 421439783, 842879579, 1685759167
+        };
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 HashTable<K,V,Prober,Hash,KEqual>::HashTable(
-    double resizeAlpha, const Prober& prober, const Hasher& hash, const KEqual& kequal)
-       :  hash_(hash), kequal_(kequal), prober_(prober)
+        double resizeAlpha, const Prober& prober, const Hasher& hash, const KEqual& kequal)
+        :  hash_(hash), kequal_(kequal), prober_(prober)
 {
     // Initialize any other data members as necessary
     alpha = resizeAlpha;
@@ -319,8 +319,10 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 bool HashTable<K,V,Prober,Hash,KEqual>::empty() const
 {
     for (size_t i = 0; i < table_.size(); i++){
-        if (table_[i]->deleted != false){
-            return false;
+        if (table_[i] != nullptr){
+            if (table_[i]->deleted != false){
+                return false;
+            }
         }
     }
     return true;
@@ -353,7 +355,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
         return;
     }
     //else, insert into hash table
-        //check if loading factor is too high?
+    //check if loading factor is too high?
     int load = size()/table_.size();
     if (load >= alpha){
         resize();
@@ -472,15 +474,15 @@ HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::probe(const KeyType& key) const
     HASH_INDEX_T h = hash_(key) % CAPACITIES[mIndex_];
     prober_.init(h, CAPACITIES[mIndex_], key);
 
-    HASH_INDEX_T loc = prober_.next(); 
+    HASH_INDEX_T loc = prober_.next();
     totalProbes_++;
     while(Prober::npos != loc)
     {
         if(nullptr == table_[loc] ) {
             return loc;
         }
-        // fill in the condition for this else if statement which should 
-        // return 'loc' if the given key exists at this location
+            // fill in the condition for this else if statement which should
+            // return 'loc' if the given key exists at this location
         else if(kequal_(table_[loc]->item.first, key)) {
             return loc;
         }
@@ -495,13 +497,13 @@ HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::probe(const KeyType& key) const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K, V, Prober, Hash, KEqual>::reportAll(std::ostream& out) const
 {
-	for(HASH_INDEX_T i = 0; i < CAPACITIES[mIndex_]; ++i)
-	{
-		if(table_[i] != nullptr)
-		{
-			out << "Bucket " << i << ": " << table_[i]->item.first << " " << table_[i]->item.second << std::endl;
-		}
-	}
+    for(HASH_INDEX_T i = 0; i < CAPACITIES[mIndex_]; ++i)
+    {
+        if(table_[i] != nullptr)
+        {
+            out << "Bucket " << i << ": " << table_[i]->item.first << " " << table_[i]->item.second << std::endl;
+        }
+    }
 }
 
 #endif
