@@ -320,7 +320,7 @@ bool HashTable<K,V,Prober,Hash,KEqual>::empty() const
 {
     for (size_t i = 0; i < table_.size(); i++){
         if (table_[i] != nullptr){
-            if (table_[i]->deleted != false){
+            if (table_[i]->deleted == false){
                 return false;
             }
         }
@@ -356,7 +356,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
     }
     //else, insert into hash table
     //check if loading factor is too high?
-    int load = size()/table_.size();
+    double load = size()/(double)table_.size();
     if (load >= alpha){
         resize();
     }
@@ -453,15 +453,21 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
     mIndex_++;
-    table_.resize(mIndex_, nullptr);
-    for (size_t i = 0; i < table_.size();i++){
-        if (table_[i] != nullptr) {
-            if (table_[i]->deleted == false) {
-                insert(table_[i]->item);
-                table_[i] = nullptr;
+    if (mIndex_ > 27){
+        throw std::logic_error("no more capacities exist");
+    }
+    std::vector<HashItem*> old_Table = table_;
+    std::vector<HashItem*> newTable_;
+    newTable_.resize(CAPACITIES[mIndex_], nullptr);
+    table_ = newTable_;
+    for (size_t i = 0; i < old_Table.size();i++){
+        if (old_Table[i] != nullptr) {
+            if (old_Table[i]->deleted == false) {
+                HashItem* h = old_Table[i];
+                insert(h->item);
             } else {
-                delete table_[i];
-                table_[i] == nullptr;
+                delete old_Table[i];
+                old_Table[i] == nullptr;
             }
         }
     }
